@@ -1,25 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const App = () => {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const apiCall = async () => {
+      const response = await fetch(
+        "https://hacker-news.firebaseio.com/v0/topstories.json"
+      );
+      const resp = await response.json();
+      const top = await resp.slice(0, 10);
+      const all = await Promise.all(
+        top?.map(async (item) => {
+          const fetched = await fetch(
+            `https://hacker-news.firebaseio.com/v0/item/${item}.json`
+          );
+          const fetchedRes = await fetched.json();
+          const comments = await fetchedRes?.kids;
+          comments?.map(async (kid) => {
+            const fetchKids = await fetch(
+              `https://hacker-news.firebaseio.com/v0/item/${kid}.json`
+            );
+            const kids = await fetchKids.json();
+          });
+        })
+      );
+      setData(all);
+    };
+    apiCall();
+  }, []);
+
+  console.log(data);
+
+  return <></>;
+};
 
 export default App;
